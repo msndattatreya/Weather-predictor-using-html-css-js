@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+<style>
+/* Internal CSS styles */
+body {
+font-family: Arial, sans-serif;
+text-align: center;
+background-color: skyblue;
+background-size: cover;
+background-repeat: no-repeat;
+background-attachment: fixed;
+margin: 0;
+padding: 0;
+position: relative; /* Added for absolute positioning */
+}
+.header-images {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 20px;
+}
+.header-image {
+width: 120px;
+height: 120px;
+border-radius: 50%;
+object-fit: cover;
+
+}
+.time {
+font-size: 24px;
+color: black;
+margin-right: 20px;
+}
+.container {
+margin: 20px auto;
+background-color: rgba(255, 255, 255, 0.9);
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+max-width: 400px;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+.center-text {
+font-size: 24px;
+color: #333;
+margin-bottom: 20px;
+position: absolute; /* Added for absolute positioning */
+top: 20px; /* Adjust this value to position the text */
+left: 50%; /* Center the text horizontally */
+transform: translateX(-50%); /* Center the text horizontally */
+}
+h1 {
+color: #333;
+font-size: 28px;
+margin-bottom: 10px;
+
+}
+label {
+color: #333;
+font-size: 18px;
+margin-top: 10px;
+}
+input[type="text"] {
+width: 100%;
+padding: 10px;
+margin: 10px 0;
+border: 1px solid black;
+border-radius: 60px;
+font-size: 16px;
+}
+button {
+background-color: #4CAF50;
+color: white;
+border: none;
+border-radius: 4px;
+padding: 12px 24px;
+cursor: pointer;
+font-size: 18px;
+transition: background-color 0.3s;
+}
+button:hover {
+background-color: #45a049;
+}
+#weatherData {
+display: none;
+margin-top: 20px;
+
+color: #333;
+}
+h2 {
+font-size: 24px;
+margin-bottom: 10px;
+}
+.weather-info {
+font-size: 18px;
+margin: 8px 0;
+}
+.weather-icon {
+width: 50px;
+height: 50px;
+margin-right: 10px;
+}
+#dateAndTime {
+font-size: 16px;
+color: black;
+}
+.forecast {
+display: flex;
+justify-content: space-between;
+margin-top: 20px;
+overflow-x: auto;
+}
+.forecast-item {
+flex: 1;
+margin: 0 10px;
+padding: 10px;
+border-radius: 10px;
+
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+text-align: center;
+}
+/* Added styles for the name at the bottom */
+.footer {
+background-color: #333;
+color: yellow;
+text-align: center;
+padding: 10px 0;
+bottom:0;
+width: 100%;
+}
+</style>
+  
+</head>
+<body>
+<div class="center-text"> <H1>WORLD WIDE WEATHER</H1></div>
+<div class="header-images">
+
+<img src="download1.jpg" width="120" height="120" alt="Image 1" class="header-
+image">
+
+<div class="time" id="time"></div>
+</div>
+<div class="container">
+<h2>BHARAT WEATHER FORECAST</h2>
+<label for="cityInput">Enter City/State/Country Name:</label>
+<input type="text" id="cityInput">
+<button onclick="getWeather()">search</button>
+<div id="weatherData">
+<h2>Current Weather</h2>
+<div>
+
+<p class="weather-info"><strong>Weather Condition:</strong> <img
+class="weather-icon" src="" alt="" id="weatherConditionIcon"> <span
+id="weatherCondition"></span></p>
+
+<p class="weather-info"><strong>Temperature:</strong> <img class="weather-
+icon" src="" alt="" id="temperatureIcon"> <span id="temperature"></span>°C</p>
+
+<p class="weather-info"><strong>Humidity:</strong> <img class="weather-icon"
+src="" alt="" id="humidityIcon"> <span id="humidity"></span>%</p>
+
+<p class="weather-info"><strong>Wind Speed:</strong> <img class="weather-
+icon" src="" alt="" id="windSpeedIcon"> <span id="windSpeed"></span> m/s</p>
+
+<p class="weather-info"><strong>Date and Time:</strong> <span
+id="dateAndTime"></span></p>
+</div>
+</div>
+<div id="nearbyWeather" class="forecast"></div>
+</div>
+  
+<script>
+// Function to generate a random color in hexadecimal format
+function getRandomColor() {
+const letters = '0123456789ABCDEF';
+let color = '#';
+for (let i = 0; i < 6; i++) {
+color += letters[Math.floor(Math.random() * 16)];
+}
+return color;
+}
+function updateTime() {
+const timeElement = document.getElementById("time");
+const now = new Date();
+const timeString = now.toLocaleTimeString();
+timeElement.textContent = timeString;
+setTimeout(updateTime, 1000); // Update time every second
+}
+
+updateTime(); // Initial call to start updating time
+async function getWeather() {
+try {
+const city = document.getElementById("cityInput").value;
+const apiKey = '591e389a5107093e5f4e4db1e3e61531';
+const currentWeatherUrl =
+`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metr
+ic`;
+const forecastUrl =
+`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metr
+ic`;
+const currentWeatherResponse = await fetch(currentWeatherUrl);
+const forecastResponse = await fetch(forecastUrl);
+if (!currentWeatherResponse.ok || !forecastResponse.ok) {
+throw new Error(`HTTP error! Status: ${currentWeatherResponse.status}`);
+}
+const currentWeatherData = await currentWeatherResponse.json();
+const forecastData = await forecastResponse.json();
+// Update current weather data
+document.getElementById("weatherConditionIcon").src =
+`https://openweathermap.org/img/w/${currentWeatherData.weather[0].icon}.png`;
+document.getElementById("weatherCondition").textContent =
+currentWeatherData.weather[0].description;
+
+document.getElementById("temperatureIcon").src = 'https://cdn-icons-
+png.flaticon.com/512/1850/1850753.png';
+
+document.getElementById("temperature").textContent =
+currentWeatherData.main.temp;
+document.getElementById("humidityIcon").src =
+
+'https://thumbs.dreamstime.com/b/humidity-icon-flat-color-design-vector-illustration-
+141643540.jpg';
+
+document.getElementById("humidity").textContent =
+currentWeatherData.main.humidity;
+
+document.getElementById("windSpeedIcon").src = 'https://encrypted-
+tbn0.gstatic.com/images?q=tbn:ANd9GcQqOCT4-
+
+mD3ulA2eE4GqQAvX4c2Pke__TBrm7rZkudSJGOhFRKmLzQ1L9oIPtJc1jzdjQ0&usqp=C
+AU';
+document.getElementById("windSpeed").textContent =
+currentWeatherData.wind.speed;
+document.getElementById("dateAndTime").textContent = new
+Date(currentWeatherData.dt * 1000).toLocaleString();
+// Show weather data
+document.getElementById("weatherData").style.display = "block";
+// Extract and display the next 7 days of weather forecast
+const forecastList = forecastData.list;
+const sevenDayForecast = [];
+// Extract unique dates from the forecast
+const uniqueDates = [];
+for (const forecast of forecastList) {
+const forecastDate = new Date(forecast.dt * 1000).toLocaleDateString();
+if (!uniqueDates.includes(forecastDate)) {
+uniqueDates.push(forecastDate);
+sevenDayForecast.push(forecast);
+}
+if (sevenDayForecast.length >= 7) {
+break;
+}
+}
+const nearbyWeatherContainer = document.getElementById("nearbyWeather");
+nearbyWeatherContainer.innerHTML = "";
+for (let i = 0; i < sevenDayForecast.length; i++) {
+const forecast = sevenDayForecast[i];
+const forecastDate = new Date(forecast.dt * 1000).toLocaleDateString();
+const forecastWeatherCondition = forecast.weather[0].description;
+const forecastTemperature = forecast.main.temp;
+const forecastHumidity = forecast.main.humidity;
+
+const forecastWindSpeed = forecast.wind.speed;
+const forecastWeatherItem = document.createElement("div");
+forecastWeatherItem.classList.add("forecast-item");
+// Generate a random background color for each day's forecast
+forecastWeatherItem.style.backgroundColor = getRandomColor();
+forecastWeatherItem.innerHTML = `
+<p>Date: ${forecastDate}</p>
+<p>Weather Condition: ${forecastWeatherCondition}</p>
+<p>Temperature: ${forecastTemperature}°C</p>
+<p>Humidity: ${forecastHumidity}%</p>
+<p>Wind Speed: ${forecastWindSpeed} m/s</p>
+`;
+nearbyWeatherContainer.appendChild(forecastWeatherItem);
+}
+// Show the weather forecast
+nearbyWeatherContainer.style.display = "block";
+} catch (error) {
+console.error("An error occurred: ", error);
+// Handle the error, e.g., display an error message to the user
+}
+}
+</script>
+  
+<!-- footer -->
+<div class="footer">Designed & Devoleped by Maganti Suryanarayana Dattatreya</div>
+</body>
+</html>
